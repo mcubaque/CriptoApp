@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Ataques a RSA{% endblock %}
+{% block content %}
+<h1>Ataques a RSA</h1>
+<p class="subtitle">Tres ataques clásicos cuando RSA se usa mal o con parámetros débiles.</p>
+
+<div class="panel" x-data="{ modo: 'factorizar', n: '', nCm: '', e1: '', c1: '', e2: '', c2: '', eW: '', nW: '' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='factorizar'}" @click="modo='factorizar'">Factorizar n</button>
+    <button type="button" :class="{active: modo==='modulo_comun'}" @click="modo='modulo_comun'">Módulo común</button>
+    <button type="button" :class="{active: modo==='wiener'}" @click="modo='wiener'">Wiener (d pequeño)</button>
+  </div>
+
+  <form hx-post="{{ url_for('asymmetric.rsa_attacks_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+
+    <div class="form-row" x-show="modo==='factorizar'">
+      <label>n (el módulo público)</label>
+      <input type="number" name="n" x-model="n" placeholder="p.ej. 3233">
+    </div>
+
+    <div x-show="modo==='modulo_comun'">
+      <p class="subtitle" style="margin:0 0 8px; font-size:0.82rem;">El mismo mensaje cifrado dos veces bajo el mismo n, con exponentes distintos.</p>
+      <div class="form-row"><label>n</label><input type="number" name="n_cm" x-model="nCm" placeholder="p.ej. 3233"></div>
+      <div class="form-inline">
+        <div class="form-row"><label>e1</label><input type="number" name="e1" x-model="e1" placeholder="17"></div>
+        <div class="form-row"><label>c1 (cifrado con e1)</label><input type="number" name="c1" x-model="c1" placeholder="2790"></div>
+      </div>
+      <div class="form-inline">
+        <div class="form-row"><label>e2</label><input type="number" name="e2" x-model="e2" placeholder="19"></div>
+        <div class="form-row"><label>c2 (cifrado con e2)</label><input type="number" name="c2" x-model="c2" placeholder="232"></div>
+      </div>
+    </div>
+
+    <div class="form-inline" x-show="modo==='wiener'">
+      <div class="form-row"><label>e (llave pública)</label><input type="number" name="e_w" x-model="eW" placeholder="p.ej. 431"></div>
+      <div class="form-row"><label>n</label><input type="number" name="n_w" x-model="nW" placeholder="p.ej. 3127"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar ataque</button>
+      <button class="example-btn" type="button" x-show="modo==='factorizar'" @click="n=3233">Cargar ejemplo</button>
+      <button class="example-btn" type="button" x-show="modo==='modulo_comun'"
+        @click="nCm=3233; e1=17; c1=2790; e2=19; c2=232">Cargar ejemplo</button>
+      <button class="example-btn" type="button" x-show="modo==='wiener'" @click="eW=431; nW=3127">Cargar ejemplo (d=7, pequeño)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funcionan estos ataques matemáticamente?</summary>
+  <p><strong>Factorización:</strong> toda la seguridad de RSA depende de que factorizar n sea inviable.
+  Si n es pequeño, la división de tanteo (probar cada divisor hasta √n) lo rompe en tiempo lineal.</p>
+  <p><strong>Módulo común:</strong> si a·e1 + b·e2 = 1 (Euclides extendido, posible cuando gcd(e1,e2)=1),
+  entonces c1^a · c2^b = (m^e1)^a · (m^e2)^b = m^(a·e1 + b·e2) = m^1 = m (mod n) — sin necesitar ninguna
+  llave privada. Por eso nunca se debe reusar el mismo n para cifrar el mismo mensaje a distintos
+  destinatarios con distinto e.</p>
+  <p><strong>Wiener:</strong> los convergentes de la fracción continua de e/n son, matemáticamente, las
+  mejores aproximaciones racionales posibles a e/n con denominador pequeño. Se puede demostrar que si
+  d &lt; (1/3)·n^(1/4), entonces k/d (para algún k relacionado con φ(n)) aparece necesariamente como uno
+  de esos convergentes — por eso basta probarlos todos, en vez de buscar d por fuerza bruta.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> estos tres ataques son la razón de reglas concretas en implementaciones
+  reales de RSA: n de 2048+ bits (factorización), nunca reusar n entre destinatarios (módulo común), y
+  nunca usar un d pequeño "para descifrar más rápido" (Wiener) — todas son fallas de implementación, no
+  de la matemática de RSA en sí.
+</div>
+{% endblock %}

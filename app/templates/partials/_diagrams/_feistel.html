@@ -1,0 +1,92 @@
+{% set d = s.extra %}
+<div class="feistel-diagram">
+
+  <div class="fd-row">
+    <div class="fd-box fd-io">
+      <div class="fd-box-label">Bloque de entrada</div>
+      <div class="fd-box-value">{{ d.plaintext_bits }}</div>
+    </div>
+    <div class="fd-arrow">IP →</div>
+    <div class="fd-box fd-io">
+      <div class="fd-box-label">Tras IP</div>
+      <div class="fd-box-value">{{ d.ip_out }}</div>
+    </div>
+  </div>
+
+  <div class="fd-halves">
+    <div class="fd-box fd-half">
+      <div class="fd-box-label">L0</div>
+      <div class="fd-box-value">{{ d.l0 }}</div>
+    </div>
+    <div class="fd-box fd-half">
+      <div class="fd-box-label">R0</div>
+      <div class="fd-box-value">{{ d.r0 }}</div>
+    </div>
+  </div>
+
+  <div class="fd-round">
+    <div class="fd-round-label">Ronda 1</div>
+    <div class="fd-flow">
+      <div class="fd-box fd-half fd-dim">R0<br><span>{{ d.r0 }}</span></div>
+      <div class="fd-arrow">↓</div>
+      <div class="fd-box fd-f">
+        <div class="fd-box-label">F(R0, {{ d.key_a_label }})</div>
+        <div class="fd-box-sub">subclave {{ d.key_a_label }} = {{ d.key_a }}</div>
+        <div class="fd-box-value">{{ d.f1_out }}</div>
+      </div>
+      <div class="fd-arrow">⊕ L0 ({{ d.l0 }})</div>
+      <div class="fd-box fd-half">
+        <div class="fd-box-label">L1 = L0 ⊕ F</div>
+        <div class="fd-box-value">{{ d.l1 }}</div>
+      </div>
+    </div>
+    <div class="fd-note">R1 = R0 = {{ d.r1 }} (no cambia)</div>
+  </div>
+
+  <div class="fd-row">
+    <div class="fd-arrow fd-swap">⇄ SW: intercambiar mitades</div>
+  </div>
+
+  <div class="fd-halves">
+    <div class="fd-box fd-half">
+      <div class="fd-box-label">Izquierda</div>
+      <div class="fd-box-value">{{ d.sw_l }}</div>
+    </div>
+    <div class="fd-box fd-half">
+      <div class="fd-box-label">Derecha</div>
+      <div class="fd-box-value">{{ d.sw_r }}</div>
+    </div>
+  </div>
+
+  <div class="fd-round">
+    <div class="fd-round-label">Ronda 2</div>
+    <div class="fd-flow">
+      <div class="fd-box fd-half fd-dim">{{ d.sw_r }}</div>
+      <div class="fd-arrow">↓</div>
+      <div class="fd-box fd-f">
+        <div class="fd-box-label">F(·, {{ d.key_b_label }})</div>
+        <div class="fd-box-sub">subclave {{ d.key_b_label }} = {{ d.key_b }}</div>
+        <div class="fd-box-value">{{ d.f2_out }}</div>
+      </div>
+      <div class="fd-arrow">⊕ ({{ d.sw_l }})</div>
+      <div class="fd-box fd-half">
+        <div class="fd-box-label">L2</div>
+        <div class="fd-box-value">{{ d.l2 }}</div>
+      </div>
+    </div>
+    <div class="fd-note">R2 = {{ d.r2 }} (no cambia)</div>
+  </div>
+
+  <div class="fd-row">
+    <div class="fd-box fd-io">
+      <div class="fd-box-label">L2 || R2</div>
+      <div class="fd-box-value">{{ d.l2 }}{{ d.r2 }}</div>
+    </div>
+    <div class="fd-arrow">IP⁻¹ →</div>
+    <div class="fd-box fd-io fd-final">
+      <div class="fd-box-label">Resultado</div>
+      <div class="fd-box-value">{{ d.final }}</div>
+    </div>
+  </div>
+
+</div>

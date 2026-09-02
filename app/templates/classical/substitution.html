@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Sustitución{% endblock %}
+{% block content %}
+<h1>Cifrado por sustitución monoalfabética</h1>
+<p class="subtitle">La llave es una permutación completa de las 26 letras.</p>
+
+<div class="panel" x-data="{ modo: 'cifrar', texto: '', llave: 'XNYAHPOGZQWBTSFLRCVMUEKJDI', mapping: '' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='cifrar'}" @click="modo='cifrar'">Cifrar</button>
+    <button type="button" :class="{active: modo==='descifrar'}" @click="modo='descifrar'">Descifrar</button>
+    <button type="button" :class="{active: modo==='romper'}" @click="modo='romper'">Romper (interactivo)</button>
+    <button type="button" :class="{active: modo==='auto'}" @click="modo='auto'">Auto-resolver</button>
+  </div>
+
+  <form hx-post="{{ url_for('classical.substitution_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+    <div class="form-row">
+      <label>Texto</label>
+      <textarea name="texto" x-model="texto" placeholder="Escribe el texto plano o cifrado..."></textarea>
+    </div>
+
+    <div class="form-row" x-show="modo==='cifrar' || modo==='descifrar'">
+      <label>Llave (26 letras, permutación de A-Z)</label>
+      <input type="text" name="llave" x-model="llave" maxlength="26">
+    </div>
+
+    <div class="form-row" x-show="modo==='romper'">
+      <label>Hipótesis acumuladas (formato: CIFRADA=plana, separadas por coma)</label>
+      <input type="text" name="mapping" x-model="mapping" placeholder="M=t, G=h, Z=i">
+      <p class="subtitle" style="margin:6px 0 0; font-size:0.82rem;">
+        Edita este campo y vuelve a pulsar "Ejecutar" para ir revelando el texto letra por letra,
+        guiándote por las frecuencias y los digramas/trigramas comunes que se muestran abajo.
+      </p>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" x-show="modo==='descifrar'"
+        @click="texto='MGZVYZLGHCMHJMYXSSFMNHAHYCDLMHA'; llave='XNYAHPOGZQWBTSFLRCVMUEKJDI'">
+        Cargar ejemplo del documento (descifrar)</button>
+      <button class="example-btn" type="button" x-show="modo==='romper' || modo==='auto'"
+        @click="texto='MGZVYZLGHCMHJMYXSSFMNHAHYCDLMHA'; mapping='M=t, G=h'">
+        Cargar ejemplo del documento (romper)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>El tamaño de la llave (26!, sobre 4×10²⁶ posibilidades) hace que la fuerza bruta sea inviable, pero
+  el idioma natural no es aleatorio: tiene <strong>redundancia estadística</strong> (entropía baja por
+  letra comparada con el máximo teórico de log₂(26) ≈ 4.7 bits). Como la sustitución es
+  <em>determinista</em> — la misma letra plana siempre produce la misma letra cifrada — todo el patrón
+  estadístico del idioma (frecuencias de letras, digramas, trigramas) se traslada intacto al texto
+  cifrado, solo que con otras etiquetas. Eso es exactamente lo que explota el análisis de frecuencias.</p>
+  <p>Dicho de otro modo: el tamaño de la llave mide cuánto "espacio de búsqueda" hay, pero la seguridad
+  real depende de cuánta información sobre la llave se filtra por cada letra cifrada — y aquí se filtra
+  muchísima.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> aunque hay 26! (~4×10²⁶) llaves posibles -demasiadas para fuerza
+  bruta-, el análisis de frecuencias rompe este cifrado en minutos porque cada letra siempre se cifra
+  igual, preservando el patrón estadístico del idioma.
+</div>
+{% endblock %}

@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}S-AES{% endblock %}
+{% block content %}
+<h1>S-AES (Simplified AES)</h1>
+<p class="subtitle">Clave de 16 bits, bloque de 4 nibbles, aritmética en GF(2⁴), 2 rondas.</p>
+
+<div class="panel" x-data="{ modo: 'cifrar', bloque: '', llave: '' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='cifrar'}" @click="modo='cifrar'">Cifrar</button>
+    <button type="button" :class="{active: modo==='descifrar'}" @click="modo='descifrar'">Descifrar</button>
+  </div>
+  <form hx-post="{{ url_for('symmetric_modern.saes_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+    <div class="form-inline">
+      <div class="form-row"><label>Bloque (16 bits)</label><input type="text" name="bloque" x-model="bloque" maxlength="16" placeholder="p.ej. 1101011100101000"></div>
+      <div class="form-row"><label>Llave (16 bits)</label><input type="text" name="llave" x-model="llave" maxlength="16" placeholder="p.ej. 0100101011110101"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" @click="bloque='1101011100101000'; llave='0100101011110101'">
+        Cargar ejemplo verificado</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>Los nibbles se tratan como elementos de <strong>GF(2⁴)</strong>, el cuerpo finito con 16 elementos
+  construido con polinomios de grado &lt;4 sobre GF(2), reducidos módulo el polinomio irreducible
+  x⁴+x+1. Que sea un <em>cuerpo</em> (no solo un anillo) significa que todo elemento distinto de 0 tiene
+  inverso multiplicativo — y esa es justo la propiedad que garantiza que la matriz de MixColumns,
+  Me = [[1,4],[4,1]], tenga una matriz inversa Md = [[9,2],[2,9]] tal que Md·Me = I. Por eso
+  InvMixColumns puede deshacer exactamente lo que hizo MixColumns.</p>
+  <div class="formula-block">Me · Md = I (mod x⁴+x+1) &nbsp;&nbsp;→&nbsp;&nbsp; InvMixColumns(MixColumns(S)) = S</div>
+  <p>SubNibbles/ShiftRows son simples sustituciones y reordenamientos (invertibles por construcción,
+  igual que la sustitución monoalfabética o la transposición clásicas); AddRoundKey es XOR, que es su
+  propio inverso. La combinación de las cuatro operaciones por ronda es lo que en criptografía moderna
+  se llama una red de <strong>sustitución-permutación (SPN)</strong>.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> AES real usa un estado de 16 bytes (128 bits), claves de 128/192/256
+  bits, 10-14 rondas y aritmética en GF(2⁸). S-AES conserva la misma estructura (SubNibbles, ShiftRows,
+  MixColumns, AddRoundKey) a una escala donde cada multiplicación se puede verificar a mano.
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Hash y HMAC{% endblock %}
+{% block content %}
+<h1>Funciones hash y HMAC</h1>
+<p class="subtitle">SHA-256, SHA-1, MD5 (envolviendo la librería estándar de Python), efecto avalancha, y HMAC.</p>
+
+<div class="panel" x-data="{ modo: 'hash', algoritmo: 'sha256', texto: '', textoA: '', textoB: '', llave: '' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='hash'}" @click="modo='hash'">Calcular hash</button>
+    <button type="button" :class="{active: modo==='avalancha'}" @click="modo='avalancha'">Efecto avalancha</button>
+    <button type="button" :class="{active: modo==='hmac'}" @click="modo='hmac'">HMAC</button>
+  </div>
+
+  <form hx-post="{{ url_for('authentication.hash_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+    <div class="form-row">
+      <label>Algoritmo</label>
+      <select name="algoritmo" x-model="algoritmo">
+        <option value="sha256">SHA-256</option>
+        <option value="sha1">SHA-1 (obsoleto)</option>
+        <option value="md5">MD5 (obsoleto)</option>
+      </select>
+    </div>
+
+    <div class="form-row" x-show="modo==='hash'">
+      <label>Texto</label>
+      <textarea name="texto" x-model="texto" placeholder="Escribe cualquier texto..."></textarea>
+    </div>
+
+    <div x-show="modo==='avalancha'">
+      <div class="form-row"><label>Texto A</label><input type="text" name="texto_a" x-model="textoA" placeholder="hello"></div>
+      <div class="form-row"><label>Texto B (cámbiale 1 carácter)</label><input type="text" name="texto_b" x-model="textoB" placeholder="hellp"></div>
+    </div>
+
+    <div x-show="modo==='hmac'">
+      <div class="form-row"><label>Llave secreta</label><input type="text" name="llave" x-model="llave" placeholder="secreto"></div>
+      <div class="form-row"><label>Mensaje</label><input type="text" name="texto" x-model="texto" placeholder="mensaje a proteger"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" x-show="modo==='avalancha'" @click="textoA='hello'; textoB='hellp'">Cargar ejemplo</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>Una función hash criptográfica debe ser (1) <strong>determinista</strong> (mismo input → mismo
+  output siempre), (2) de <strong>salida fija</strong> sin importar el tamaño de la entrada, (3)
+  <strong>unidireccional</strong> (fácil calcular el hash, computacionalmente inviable recuperar el
+  mensaje original a partir del hash), y (4) <strong>resistente a colisiones</strong> (inviable
+  encontrar dos mensajes distintos con el mismo hash). El efecto avalancha (que un solo bit de
+  diferencia en la entrada cambie ~50% de los bits de salida) es una consecuencia deseable de estas
+  propiedades: si los hashes de entradas parecidas se parecieran entre sí, eso filtraría información
+  sobre la entrada, rompiendo la propiedad unidireccional.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> nunca guardes contraseñas con un hash simple sin sal (ver
+  "Cracking de contraseñas"). Para verificar contraseñas se usan funciones diseñadas para ser
+  <em>lentas</em> a propósito (bcrypt, scrypt, Argon2) — lo opuesto de SHA-256, que es rápido por
+  diseño (bueno para integridad de archivos, malo para contraseñas porque facilita la fuerza bruta).
+</div>
+{% endblock %}

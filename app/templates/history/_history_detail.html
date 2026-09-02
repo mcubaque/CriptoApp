@@ -1,0 +1,5 @@
+<div class="panel">
+  <h2>Detalle #{{ row.id }} — {{ row.family }} / {{ row.algorithm }} / {{ row.operation }}</h2>
+  {% if row.note %}<p class="subtitle">{{ row.note }}</p>{% endif %}
+  {% include "partials/_step_trace.html" %}
+</div>

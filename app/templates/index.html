@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Cripto App{% endblock %}
+{% block content %}
+<h1>Cripto App</h1>
+<p class="subtitle">Herramienta interactiva para aprender criptografía viendo el proceso paso a paso, no solo el resultado.</p>
+
+<div class="card-grid">
+  <a class="card" href="{{ url_for('classical.index') }}">
+    <h3>Criptografía clásica</h3>
+    <p>Desplazamiento, afín, transposición, sustitución y criptoanálisis por frecuencias.</p>
+  </a>
+  <a class="card" href="{{ url_for('symmetric_modern.index') }}">
+    <h3>Simétrica moderna</h3>
+    <p>S-DES y S-AES: versiones didácticas de DES y AES, ronda por ronda.</p>
+  </a>
+  <a class="card" href="{{ url_for('asymmetric.index') }}">
+    <h3>Asimétrica</h3>
+    <p>RSA, Diffie-Hellman, firmas digitales, ataques a RSA y criptografía híbrida.</p>
+  </a>
+  <a class="card" href="{{ url_for('pki.index') }}">
+    <h3>PKI y Certificados</h3>
+    <p>Certificados digitales, cadenas de confianza, y anillos de confianza descentralizados.</p>
+  </a>
+  <a class="card" href="{{ url_for('authentication.index') }}">
+    <h3>Autenticación</h3>
+    <p>Funciones hash, HMAC, cracking de contraseñas y verificación biométrica.</p>
+  </a>
+  <a class="card" href="{{ url_for('history.index') }}">
+    <h3>Historial</h3>
+    <p>Revisa operaciones anteriores y vuelve a ver su traza paso a paso.</p>
+  </a>
+</div>
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}PKI y Certificados{% endblock %}
+{% block content %}
+<h1>PKI y Certificados</h1>
+<p class="subtitle">Infraestructura de clave pública: certificados digitales y modelos de confianza.</p>
+<div class="card-grid">
+  <a class="card" href="{{ url_for('pki.certificates_page') }}">
+    <h3>Certificados digitales</h3>
+    <p>Emite y verifica certificados firmados; corre una cadena de confianza de 3 niveles (Root → Intermedia → Entidad final).</p>
+  </a>
+  <a class="card" href="{{ url_for('pki.trust_page') }}">
+    <h3>Anillos de confianza</h3>
+    <p>Modelo descentralizado (estilo PGP): define quién confía en quién y verifica si hay un camino de confianza.</p>
+  </a>
+</div>
+{% endblock %}

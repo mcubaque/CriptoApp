@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Simétrica moderna{% endblock %}
+{% block content %}
+<h1>Criptografía simétrica moderna</h1>
+<p class="subtitle">Versiones didácticas de DES y AES: cada ronda, cada S-box, cada multiplicación en GF(2⁴).</p>
+<div class="card-grid">
+  <a class="card" href="{{ url_for('symmetric_modern.sdes_page') }}">
+    <h3>S-DES</h3>
+    <p>Clave de 10 bits, bloque de 8 bits, 2 rondas Feistel. La versión didáctica de DES.</p>
+  </a>
+  <a class="card" href="{{ url_for('symmetric_modern.saes_page') }}">
+    <h3>S-AES</h3>
+    <p>Clave de 16 bits, bloque de 4 nibbles, aritmética en GF(2⁴). La versión didáctica de AES.</p>
+  </a>
+</div>
+{% endblock %}

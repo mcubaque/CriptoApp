@@ -1,0 +1,45 @@
+{% if result.error %}
+<div class="alert error">{{ result.error }}</div>
+{% endif %}
+
+{% if result.output %}
+{% set last_step_ok = (result.steps[-1].ok != false) if result.steps else true %}
+<div class="result-box {% if not last_step_ok %}result-fail{% endif %}">
+  <span class="label">{{ result.output_label }}</span>
+  {{ result.output }}
+</div>
+{% endif %}
+
+{% for s in result.steps %}
+<div class="step {% if s.ok == false %}step-bad{% endif %}">
+  <div class="step-title"><span class="idx">Paso {{ s.index }}.</span>{{ s.title }}</div>
+  <div class="step-explanation">{{ s.explanation }}</div>
+  {% if s.formula %}<div class="step-formula">{{ s.formula }}</div>{% endif %}
+  {% if s.chart and s.chart.type == 'bar' %}
+  <div class="bar-chart">
+    {% for b in s.chart.bars %}
+    <div class="bar-col">
+      <div class="bar-track"><div class="bar" style="height: {{ b.pct }}%;" title="{{ b.label }}: {{ b.value }}"></div></div>
+      <div class="bar-label">{{ b.label }}</div>
+      <div class="bar-value">{{ b.value }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if s.extra and s.extra.diagram_type == 'feistel' %}
+    {% include "partials/_diagrams/_feistel.html" %}
+  {% endif %}
+  {% if s.table and s.table.columns %}
+  <div style="overflow-x:auto;">
+    <table class="step-table">
+      <thead><tr>{% for c in s.table.columns %}<th>{{ c }}</th>{% endfor %}</tr></thead>
+      <tbody>
+        {% for row in s.table.rows %}
+        <tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
+</div>
+{% endfor %}

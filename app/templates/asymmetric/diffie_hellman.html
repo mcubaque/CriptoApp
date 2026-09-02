@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Diffie-Hellman{% endblock %}
+{% block content %}
+<h1>Diffie-Hellman</h1>
+<p class="subtitle">Simulación de intercambio de llaves entre A y B con números pequeños.</p>
+
+<div class="panel" x-data="{ p: '', g: '', a: '', b: '' }">
+  <form hx-post="{{ url_for('asymmetric.dh_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <div class="form-inline">
+      <div class="form-row"><label>p (primo, público)</label><input type="number" name="p" x-model="p" placeholder="p.ej. 23"></div>
+      <div class="form-row"><label>g (generador, público)</label><input type="number" name="g" x-model="g" placeholder="p.ej. 5"></div>
+    </div>
+    <div class="form-inline">
+      <div class="form-row"><label>a (secreto de A)</label><input type="number" name="a" x-model="a" placeholder="p.ej. 6"></div>
+      <div class="form-row"><label>b (secreto de B)</label><input type="number" name="b" x-model="b" placeholder="p.ej. 15"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar intercambio</button>
+      <button class="example-btn" type="button" @click="p=23; g=5; a=6; b=15">Cargar ejemplo clásico (Wikipedia DH)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>La razón de que A y B lleguen al mismo secreto es pura aritmética de exponentes: elevar a una
+  potencia y luego a otra es lo mismo sin importar el orden.</p>
+  <div class="formula-block">secreto_A = B^a mod p = (g^b)^a mod p = g^(ab) mod p = (g^a)^b mod p = A^b mod p = secreto_B</div>
+  <p>Ambas partes calculan literalmente g^(ab) mod p, solo que llegando por caminos distintos (uno
+  eleva primero a "b" y luego a "a", el otro al revés) — y la multiplicación en el exponente es
+  conmutativa. La seguridad depende de que ir "hacia adelante" (calcular g^a mod p conociendo a) es
+  rápido, pero ir "hacia atrás" (recuperar a conociendo solo g^a mod p) —el <strong>logaritmo
+  discreto</strong>— no tiene un algoritmo eficiente conocido para p grande.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> DH real usa primos de 2048 bits o más. La seguridad depende de que
+  calcular el logaritmo discreto (recuperar a partir de g^a mod p) sea computacionalmente inviable a ese
+  tamaño, aunque calcular g^a mod p sí sea rápido.
+</div>
+{% endblock %}

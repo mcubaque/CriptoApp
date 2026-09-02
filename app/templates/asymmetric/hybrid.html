@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Criptografía híbrida{% endblock %}
+{% block content %}
+<h1>Criptografía híbrida</h1>
+<p class="subtitle">RSA cifra una llave de sesión pequeña; S-AES (mucho más rápido) cifra el mensaje real con esa llave. Así funciona TLS/HTTPS en el mundo real.</p>
+
+<div class="panel" x-data="{ modo: 'cifrar', texto: '', sessionKey: '', e: '', n: '', llaveCifrada: '', bloques: '', d: '' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='cifrar'}" @click="modo='cifrar'">Cifrar</button>
+    <button type="button" :class="{active: modo==='descifrar'}" @click="modo='descifrar'">Descifrar</button>
+  </div>
+
+  <form hx-post="{{ url_for('asymmetric.hybrid_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+
+    <div x-show="modo==='cifrar'">
+      <div class="form-row"><label>Mensaje</label><input type="text" name="texto" x-model="texto" placeholder="Hola!"></div>
+      <div class="form-inline">
+        <div class="form-row"><label>Llave de sesión S-AES (16 bits)</label><input type="text" name="session_key" x-model="sessionKey" maxlength="16" placeholder="1010110011000101"></div>
+        <div class="form-row"><label>e (pública del destinatario)</label><input type="number" name="e" x-model="e" placeholder="17"></div>
+        <div class="form-row"><label>n</label><input type="number" name="n" x-model="n" placeholder="66013"></div>
+      </div>
+    </div>
+
+    <div x-show="modo==='descifrar'">
+      <div class="form-row"><label>Llave de sesión cifrada (número)</label><input type="number" name="llave_cifrada" x-model="llaveCifrada"></div>
+      <div class="form-row"><label>Bloques cifrados (separados por "|")</label><input type="text" name="bloques" x-model="bloques"></div>
+      <div class="form-inline">
+        <div class="form-row"><label>d (privada del destinatario)</label><input type="number" name="d" x-model="d" placeholder="3853"></div>
+        <div class="form-row"><label>n</label><input type="number" name="n_dec" x-model="n" placeholder="66013"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" x-show="modo==='cifrar'"
+        @click="texto='Hi!'; sessionKey='1010110011000101'; e=17; n=66013">Cargar ejemplo (destinatario con n=66013)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+  <p class="subtitle" style="margin-top:10px; font-size:0.82rem;">
+    Tip: cifra primero, copia "llave_cifrada" y "bloques" del resultado, y pégalos en modo Descifrar
+    con d=3853, n=66013 (la llave privada correspondiente al ejemplo).
+  </p>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué se hace híbrido en vez de solo RSA o solo S-AES?</summary>
+  <p>RSA (y la criptografía asimétrica en general) es órdenes de magnitud más lento que la simétrica, y
+  además solo puede cifrar mensajes más pequeños que n. Cifrar directamente un archivo grande con RSA
+  sería lentísimo e impráctico. La solución: usar RSA solo para resolver el problema difícil (distribuir
+  una llave secreta de forma segura sin haberse visto antes), y una vez ambas partes comparten esa llave,
+  usar cifrado simétrico (rápido) para el volumen real de datos.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> esto es exactamente lo que hace TLS/HTTPS al conectarte a un sitio
+  web: un intercambio asimétrico (RSA o, más modernamente, Diffie-Hellman con curvas elípticas) establece
+  una llave de sesión, y todo el tráfico real se cifra con AES simétrico bajo esa llave. Aquí también se
+  ve, de paso, la debilidad de cifrar cada bloque de forma independiente (modo ECB): si el mensaje
+  tuviera bloques repetidos, se verían patrones repetidos en el cifrado.
+</div>
+{% endblock %}

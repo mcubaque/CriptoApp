@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}S-DES{% endblock %}
+{% block content %}
+<h1>S-DES (Simplified DES)</h1>
+<p class="subtitle">Clave de 10 bits, bloque de 8 bits, 2 rondas Feistel.</p>
+
+<div class="panel" x-data="{ modo: 'cifrar', bloque: '', llave: '' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='cifrar'}" @click="modo='cifrar'">Cifrar</button>
+    <button type="button" :class="{active: modo==='descifrar'}" @click="modo='descifrar'">Descifrar</button>
+  </div>
+  <form hx-post="{{ url_for('symmetric_modern.sdes_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+    <div class="form-inline">
+      <div class="form-row"><label>Bloque (8 bits)</label><input type="text" name="bloque" x-model="bloque" maxlength="8" placeholder="p.ej. 00101000"></div>
+      <div class="form-row"><label>Llave (10 bits)</label><input type="text" name="llave" x-model="llave" maxlength="10" placeholder="p.ej. 1100011110"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" @click="bloque='00101000'; llave='1100011110'">
+        Cargar ejemplo verificado</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>Una <strong>red Feistel</strong> es invertible sin importar qué tan complicada (o simple) sea la
+  función F, y sin que F necesite tener inversa. El truco está en cómo se combina: cada ronda calcula
+  L' = L ⊕ F(R), R' = R (y luego se intercambian los lados). Para deshacer una ronda solo hace falta
+  volver a calcular F(R) con el mismo R (que no cambió) y aplicar XOR otra vez — porque
+  (L ⊕ F(R)) ⊕ F(R) = L, ya que x ⊕ x = 0 para cualquier x en aritmética binaria.</p>
+  <div class="formula-block">(L ⊕ F(R)) ⊕ F(R) = L ⊕ (F(R) ⊕ F(R)) = L ⊕ 0 = L</div>
+  <p>Por eso para descifrar basta con aplicar las mismas rondas <strong>en orden inverso de subclaves</strong>
+  (K2 luego K1) — no hace falta invertir la función F en absoluto. Esta misma idea, con F mucho más
+  compleja y 16 rondas, es la base del DES real.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> DES real usa una clave de 56 bits, un bloque de 64 bits y 16 rondas;
+  hoy se considera inseguro por el tamaño de su clave y fue reemplazado por AES. S-DES conserva la misma
+  estructura Feistel para que puedas ver cómo funciona una ronda, sin la complejidad de 16 repeticiones.
+</div>
+{% endblock %}

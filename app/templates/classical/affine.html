@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Afín{% endblock %}
+{% block content %}
+<h1>Cifrado afín</h1>
+<p class="subtitle">e<sub>K</sub>(x) = (ax + b) mod 26, con K=(a,b) y gcd(a,26)=1.</p>
+
+<div class="panel" x-data="{ modo: 'cifrar', texto: '', a: 7, b: 2,
+    c1: '', p1: 'e', c2: '', p2: 't' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='cifrar'}" @click="modo='cifrar'">Cifrar</button>
+    <button type="button" :class="{active: modo==='descifrar'}" @click="modo='descifrar'">Descifrar</button>
+    <button type="button" :class="{active: modo==='romper_fuerza'}" @click="modo='romper_fuerza'">Romper (fuerza bruta)</button>
+    <button type="button" :class="{active: modo==='romper_frecuencia'}" @click="modo='romper_frecuencia'">Romper (frecuencias)</button>
+  </div>
+
+  <form hx-post="{{ url_for('classical.affine_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+    <div class="form-row">
+      <label>Texto</label>
+      <textarea name="texto" x-model="texto" placeholder="Escribe el texto plano o cifrado..."></textarea>
+    </div>
+
+    <div class="form-inline" x-show="modo==='cifrar' || modo==='descifrar'">
+      <div class="form-row"><label>a (coprimo con 26)</label><input type="number" name="a" x-model="a"></div>
+      <div class="form-row"><label>b</label><input type="number" name="b" x-model="b" min="0" max="25"></div>
+    </div>
+
+    <div x-show="modo==='romper_frecuencia'">
+      <p class="subtitle" style="margin:6px 0 10px;">Elige dos letras cifradas frecuentes y a qué letra plana crees que corresponden.</p>
+      <div class="form-inline">
+        <div class="form-row"><label>Letra cifrada #1</label><input type="text" name="cipher_letter_1" x-model="c1" maxlength="1"></div>
+        <div class="form-row"><label>¿Corresponde a?</label><input type="text" name="plain_letter_1" x-model="p1" maxlength="1"></div>
+      </div>
+      <div class="form-inline">
+        <div class="form-row"><label>Letra cifrada #2</label><input type="text" name="cipher_letter_2" x-model="c2" maxlength="1"></div>
+        <div class="form-row"><label>¿Corresponde a?</label><input type="text" name="plain_letter_2" x-model="p2" maxlength="1"></div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" x-show="modo==='cifrar'"
+        @click="texto='attackhasbeenalreadydone'; a=7; b=2">Cargar ejemplo del documento (cifrar)</button>
+      <button class="example-btn" type="button" x-show="modo==='romper_frecuencia'"
+        @click="texto='FMXVEDKAPHFERBNDKRXRSREFMORUDSDKDVSHVUFEDKAPRKDLYEVLRHHRH'; c1='R'; p1='e'; c2='K'; p2='t'">
+        Cargar ejemplo del documento (romper)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>Para que exista una operación inversa, "a" debe tener un <strong>inverso multiplicativo</strong>
+  módulo 26 — un número a⁻¹ tal que a·a⁻¹ ≡ 1 (mod 26). Eso solo existe cuando a y 26 son coprimos
+  (gcd(a,26)=1); si comparten un factor, la multiplicación por a colapsa varias letras distintas al
+  mismo valor, y esa información ya no se puede recuperar. Por eso "a" no puede ser cualquier número,
+  pero "b" sí (sumar siempre es invertible restando).</p>
+  <div class="formula-block">e_K(x) = (ax + b) mod 26 &nbsp;&nbsp;·&nbsp;&nbsp; d_K(y) = a⁻¹(y − b) mod 26</div>
+  <p>φ(26) = 12 es la cantidad de valores de "a" que cumplen esa condición (la función φ de Euler
+  cuenta los coprimos con 26) — por eso hay exactamente 12 × 26 = 312 llaves legales.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> con n=26 solo hay 312 llaves posibles (12 valores de a × 26 de b),
+  así que este cifrado tampoco resiste fuerza bruta ni análisis de frecuencias.
+</div>
+{% endblock %}

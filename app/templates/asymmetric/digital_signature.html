@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Firmas digitales{% endblock %}
+{% block content %}
+<h1>Firmas digitales (RSA)</h1>
+<p class="subtitle">Firmar es "cifrar con la llave privada"; verificar es "descifrar con la llave pública" y comparar contra el hash del mensaje.</p>
+
+<div class="panel" x-data="{ modo: 'firmar', texto: '', d: '', n: '', firma: '', e: '' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='firmar'}" @click="modo='firmar'">Firmar</button>
+    <button type="button" :class="{active: modo==='verificar'}" @click="modo='verificar'">Verificar</button>
+  </div>
+
+  <form hx-post="{{ url_for('asymmetric.signature_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+    <div class="form-row">
+      <label>Mensaje</label>
+      <textarea name="texto" x-model="texto" placeholder="Escribe el mensaje a firmar o verificar..."></textarea>
+    </div>
+
+    <div class="form-inline" x-show="modo==='firmar'">
+      <div class="form-row"><label>d (llave privada)</label><input type="number" name="d" x-model="d" placeholder="p.ej. 2753"></div>
+      <div class="form-row"><label>n</label><input type="number" name="n" x-model="n" placeholder="p.ej. 3233"></div>
+    </div>
+
+    <div class="form-inline" x-show="modo==='verificar'">
+      <div class="form-row"><label>Firma recibida (número)</label><input type="number" name="firma" x-model="firma" placeholder="p.ej. 1234"></div>
+      <div class="form-row"><label>e (llave pública)</label><input type="number" name="e" x-model="e" placeholder="p.ej. 17"></div>
+      <div class="form-row"><label>n</label><input type="number" name="n_ver" x-model="n" placeholder="p.ej. 3233"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" x-show="modo==='firmar'"
+        @click="texto='hola mundo'; d=2753; n=3233">Cargar ejemplo (par clásico RSA)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+  <p class="subtitle" style="margin-top:10px; font-size:0.82rem;">
+    Tip: primero firma un mensaje en modo "Firmar" con d=2753, n=3233 (par de ejemplo). Copia el número de firma que te da,
+    y pégalo en modo "Verificar" con e=17, n=3233, usando el mismo mensaje exacto. Si cambias una sola letra del mensaje,
+    la verificación debería fallar.
+  </p>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>Firmar es aplicar la operación inversa de cifrar: en vez de cifrar con la llave pública (e) y
+  descifrar con la privada (d), aquí se "cifra" el hash del mensaje con la llave <strong>privada</strong>
+  (d) — algo que solo el dueño de esa llave puede hacer — y cualquiera puede "descifrarlo" con la llave
+  <strong>pública</strong> (e) para comprobar que efectivamente vino de ese dueño.</p>
+  <div class="formula-block">s = H(m)^d mod n &nbsp;&nbsp;·&nbsp;&nbsp; verificar: s^e mod n =? H(m)</div>
+  <p>Como (m^e)^d ≡ m (mod n) para cualquier m (por el teorema de Euler, ver la nota de RSA), lo mismo
+  aplica en el otro sentido: (H(m)^d)^e ≡ H(m) (mod n). Se firma el <em>hash</em> del mensaje, no el
+  mensaje completo, por dos razones: es mucho más corto (eficiencia) y evita ciertos ataques
+  algebraicos que existen si se firma el mensaje directamente.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> las firmas digitales dan <em>no repudio</em> — el firmante no puede
+  negar haber firmado, porque solo él tiene la llave privada. Esto es la base de la validez legal de
+  documentos firmados electrónicamente y de la verificación de certificados digitales (siguiente tema).
+</div>
+{% endblock %}

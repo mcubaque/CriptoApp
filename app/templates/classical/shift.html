@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% block title %}Desplazamiento{% endblock %}
+{% block content %}
+<h1>Cifrado por desplazamiento</h1>
+<p class="subtitle">e<sub>K</sub>(x) = (x + K) mod 26 — la generalización del César.</p>
+
+<div class="panel" x-data="{ modo: 'cifrar', texto: '', llave: 3, letraCifrada: '', letraPlana: 'e' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='cifrar'}" @click="modo='cifrar'">Cifrar</button>
+    <button type="button" :class="{active: modo==='descifrar'}" @click="modo='descifrar'">Descifrar</button>
+    <button type="button" :class="{active: modo==='romper_fuerza'}" @click="modo='romper_fuerza'">Romper (fuerza bruta)</button>
+    <button type="button" :class="{active: modo==='romper_frecuencia'}" @click="modo='romper_frecuencia'">Romper (frecuencias)</button>
+  </div>
+
+  <form hx-post="{{ url_for('classical.shift_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+    <div class="form-row">
+      <label>Texto</label>
+      <textarea name="texto" x-model="texto" placeholder="Escribe el texto plano o cifrado..."></textarea>
+    </div>
+
+    <div class="form-inline" x-show="modo==='cifrar' || modo==='descifrar'">
+      <div class="form-row">
+        <label>Llave K (0-25)</label>
+        <input type="number" name="llave" x-model="llave" min="0" max="25">
+      </div>
+    </div>
+
+    <div class="form-inline" x-show="modo==='romper_frecuencia'">
+      <div class="form-row">
+        <label>Letra cifrada más frecuente</label>
+        <input type="text" name="letra_cifrada" x-model="letraCifrada" maxlength="1" placeholder="p.ej. Y">
+      </div>
+      <div class="form-row">
+        <label>¿A qué letra plana suponemos que corresponde?</label>
+        <input type="text" name="letra_plana" x-model="letraPlana" maxlength="1">
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" x-show="modo==='cifrar'"
+        @click="texto='wewillmeetatmidnight'; llave=11">Cargar ejemplo del documento (cifrar)</button>
+      <button class="example-btn" type="button" x-show="modo==='romper_fuerza'"
+        @click="texto='JBCRCLQRWCRVNBJENBWRWN'">Cargar ejemplo del documento (romper)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>Las 26 letras se identifican con los números 0..25, es decir, con el anillo <strong>Z₂₆</strong>
+  (los enteros módulo 26). Sumar K y luego restar K son operaciones inversas exactas dentro de ese
+  anillo, sin importar el valor de K — por eso siempre se puede descifrar. La "vuelta" al llegar a 26
+  (el <code>mod 26</code>) es justamente lo que convierte la suma normal en una operación cerrada
+  dentro del alfabeto: nunca te sales de A-Z.</p>
+  <div class="formula-block">e_K(x) = (x + K) mod 26 &nbsp;&nbsp;·&nbsp;&nbsp; d_K(y) = (y − K) mod 26</div>
+  <p>El único motivo por el que esto es débil es que Z₂₆ es pequeñísimo: solo hay 26 posibles valores
+  de K, así que probarlos todos es trivial.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> el espacio de llaves de este cifrado es tan pequeño (26 valores) que
+  se puede romper por fuerza bruta en milisegundos. Los cifrados modernos usan espacios de llaves de
+  2^128 o más, precisamente para impedir este tipo de ataque.
+</div>
+{% endblock %}

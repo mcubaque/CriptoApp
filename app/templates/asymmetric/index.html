@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Asimétrica{% endblock %}
+{% block content %}
+<h1>Criptografía asimétrica</h1>
+<p class="subtitle">RSA, Diffie-Hellman, firmas, ataques y cripto híbrida — números pequeños, verificables a mano.</p>
+<div class="card-grid">
+  <a class="card" href="{{ url_for('asymmetric.rsa_page') }}">
+    <h3>RSA</h3>
+    <p>Genera llaves, cifra y descifra viendo Euclides extendido y exponenciación modular paso a paso.</p>
+  </a>
+  <a class="card" href="{{ url_for('asymmetric.dh_page') }}">
+    <h3>Diffie-Hellman</h3>
+    <p>Simula el intercambio de llaves entre dos partes y verifica que ambas obtienen el mismo secreto.</p>
+  </a>
+  <a class="card" href="{{ url_for('asymmetric.signature_page') }}">
+    <h3>Firmas digitales</h3>
+    <p>Firma un mensaje con la llave privada y verifícalo con la pública. Detecta mensajes alterados.</p>
+  </a>
+  <a class="card" href="{{ url_for('asymmetric.rsa_attacks_page') }}">
+    <h3>Ataques a RSA</h3>
+    <p>Factorización, módulo común, y el ataque de Wiener — qué pasa cuando RSA se usa mal.</p>
+  </a>
+  <a class="card" href="{{ url_for('asymmetric.hybrid_page') }}">
+    <h3>Criptografía híbrida</h3>
+    <p>RSA + S-AES combinados, como TLS/HTTPS: lo asimétrico distribuye la llave, lo simétrico cifra los datos.</p>
+  </a>
+</div>
+{% endblock %}

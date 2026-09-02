@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}RSA{% endblock %}
+{% block content %}
+<h1>RSA</h1>
+<p class="subtitle">Números pequeños (p, q &lt; 10000) para que cada paso se pueda verificar a mano.</p>
+
+<div class="panel" x-data="{ modo: 'keygen', p: '', q: '', e: '', m: '', cifradoC: '', n: '', d: '' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='keygen'}" @click="modo='keygen'">1. Generar llaves</button>
+    <button type="button" :class="{active: modo==='cifrar'}" @click="modo='cifrar'">2. Cifrar</button>
+    <button type="button" :class="{active: modo==='descifrar'}" @click="modo='descifrar'">3. Descifrar</button>
+  </div>
+
+  <form hx-post="{{ url_for('asymmetric.rsa_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+
+    <div class="form-inline" x-show="modo==='keygen'">
+      <div class="form-row"><label>p (primo)</label><input type="number" name="p" x-model="p" placeholder="p.ej. 61"></div>
+      <div class="form-row"><label>q (primo)</label><input type="number" name="q" x-model="q" placeholder="p.ej. 53"></div>
+      <div class="form-row"><label>e (exponente público)</label><input type="number" name="e" x-model="e" placeholder="p.ej. 17"></div>
+    </div>
+
+    <div class="form-inline" x-show="modo==='cifrar'">
+      <div class="form-row"><label>Mensaje m (número, m &lt; n)</label><input type="number" name="m" x-model="m" placeholder="p.ej. 65"></div>
+      <div class="form-row"><label>e</label><input type="number" name="e_pub" x-model="e" placeholder="p.ej. 17"></div>
+      <div class="form-row"><label>n</label><input type="number" name="n" x-model="n" placeholder="p.ej. 3233"></div>
+    </div>
+
+    <div class="form-inline" x-show="modo==='descifrar'">
+      <div class="form-row"><label>Cifrado c (número)</label><input type="number" name="c" x-model="cifradoC" placeholder="p.ej. 2790"></div>
+      <div class="form-row"><label>d</label><input type="number" name="d" x-model="d" placeholder="p.ej. 2753"></div>
+      <div class="form-row"><label>n</label><input type="number" name="n_dec" x-model="n" placeholder="p.ej. 3233"></div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button"
+        @click="p=61; q=53; e=17; m=65; cifradoC=2790; n=3233; d=2753">Cargar ejemplo clásico (Wikipedia RSA)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>RSA se apoya en el <strong>teorema de Euler</strong>: si gcd(m,n)=1, entonces m^φ(n) ≡ 1 (mod n).
+  La llave se construye eligiendo e y d tales que e·d ≡ 1 (mod φ(n)), es decir, e·d = 1 + k·φ(n) para
+  algún entero k. Entonces:</p>
+  <div class="formula-block">(m^e)^d = m^(ed) = m^(1 + k·φ(n)) = m · (m^φ(n))^k ≡ m · 1^k = m &nbsp;(mod n)</div>
+  <p>Por eso cifrar con e y descifrar con d siempre recupera el mensaje original, sin importar qué
+  mensaje sea (mientras 0 ≤ m &lt; n). La seguridad no depende de que esta identidad sea secreta — es
+  pública — sino de que, sin conocer p y q, calcular φ(n) = (p-1)(q-1) (y por lo tanto d) requiere
+  factorizar n, algo computacionalmente inviable para n grande.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> RSA real usa primos de 1024 bits o más (n de más de 2048 bits);
+  factorizar n para romper la llave privada es computacionalmente inviable a ese tamaño. Con primos
+  pequeños como los de esta demo, n se factoriza en microsegundos.
+</div>
+{% endblock %}

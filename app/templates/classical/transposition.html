@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Transposición{% endblock %}
+{% block content %}
+<h1>Cifrado de transposición</h1>
+<p class="subtitle">No cambia las letras, las reordena en bloques según una permutación π.</p>
+
+<div class="panel" x-data="{ modo: 'cifrar', texto: '', llave: '3,1,4,2,6,5' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='cifrar'}" @click="modo='cifrar'">Cifrar</button>
+    <button type="button" :class="{active: modo==='descifrar'}" @click="modo='descifrar'">Descifrar</button>
+  </div>
+
+  <form hx-post="{{ url_for('classical.transposition_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+    <div class="form-row">
+      <label>Texto</label>
+      <textarea name="texto" x-model="texto" placeholder="Escribe el texto plano o cifrado..."></textarea>
+    </div>
+    <div class="form-row">
+      <label>Llave π (permutación de 1..m, separada por comas)</label>
+      <input type="text" name="llave" x-model="llave">
+    </div>
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" x-show="modo==='cifrar'"
+        @click="texto='shesellsseashellsbythesea shore'.replace(/ /g,''); llave='3,1,4,2,6,5'">
+        Cargar ejemplo del documento</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>La llave π es una <strong>permutación</strong> del conjunto {1, ..., m} — una función biyectiva
+  (uno-a-uno) de ese conjunto en sí mismo. Toda permutación tiene una permutación inversa π⁻¹ que
+  exactamente deshace lo que hizo π, porque una biyección finita siempre es invertible: no se pierde
+  ni se duplica ninguna posición en el camino.</p>
+  <div class="formula-block">y_i = x_{π(i)} &nbsp;&nbsp;·&nbsp;&nbsp; x_j = y_{π⁻¹(j)}</div>
+  <p>Ninguna letra cambia de valor, solo de posición — por eso las frecuencias de letras del texto
+  cifrado son idénticas a las del texto plano, lo cual es precisamente su debilidad frente al análisis
+  de frecuencias (aunque no directamente letra por letra, sí revela que es una transposición).</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> la transposición pura es débil porque preserva las frecuencias de
+  letras del texto original; en cifrados modernos se combina con sustitución (principio de confusión y
+  difusión de Shannon) para ser efectiva.
+</div>
+{% endblock %}

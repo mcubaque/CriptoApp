@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: cripto_app_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: cripto
+      POSTGRES_PASSWORD: cripto_dev_password
+      POSTGRES_DB: cripto_app
+    ports:
+      - "5433:5432"
+    volumes:
+      - cripto_pg_data:/var/lib/postgresql/data
+
+volumes:
+  cripto_pg_data:

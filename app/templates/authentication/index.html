@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Autenticación{% endblock %}
+{% block content %}
+<h1>Autenticación</h1>
+<p class="subtitle">Funciones hash, cracking de contraseñas y verificación biométrica.</p>
+<div class="card-grid">
+  <a class="card" href="{{ url_for('authentication.hash_page') }}">
+    <h3>Funciones hash y HMAC</h3>
+    <p>SHA-256/SHA-1/MD5, efecto avalancha, y HMAC para integridad + autenticidad.</p>
+  </a>
+  <a class="card" href="{{ url_for('authentication.passwords_page') }}">
+    <h3>Cracking de contraseñas</h3>
+    <p>Ataque de diccionario, fuerza bruta acotada, y por qué la sal (salt) defiende contra tablas precalculadas.</p>
+  </a>
+  <a class="card" href="{{ url_for('authentication.biometrics_page') }}">
+    <h3>Biométricos</h3>
+    <p>Comparación de plantillas por distancia de Hamming y el trade-off FAR/FRR.</p>
+  </a>
+</div>
+{% endblock %}

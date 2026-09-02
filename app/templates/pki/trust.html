@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Anillos de confianza{% endblock %}
+{% block content %}
+<h1>Anillos de confianza (Web of Trust)</h1>
+<p class="subtitle">Modelo descentralizado, estilo PGP: no hay una autoridad central, la confianza se construye persona a persona.</p>
+
+<div class="panel" x-data="{ edges: '', verificador: '', objetivo: '' }">
+  <form hx-post="{{ url_for('pki.trust_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <div class="form-row">
+      <label>Relaciones de confianza (formato: A->B, B->C, ...)</label>
+      <input type="text" name="edges" x-model="edges" placeholder="Ana->Beto, Beto->Carla, Carla->Dario">
+    </div>
+    <div class="form-inline">
+      <div class="form-row"><label>Verificador (¿quién quiere confiar?)</label><input type="text" name="verificador" x-model="verificador" placeholder="Ana"></div>
+      <div class="form-row"><label>Objetivo (¿en quién quiere confiar?)</label><input type="text" name="objetivo" x-model="objetivo" placeholder="Dario"></div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" type="submit">Buscar camino de confianza</button>
+      <button class="example-btn" type="button"
+        @click="edges='Ana->Beto, Beto->Carla, Carla->Dario, Xavier->Yolanda'; verificador='Ana'; objetivo='Dario'">
+        Cargar ejemplo (camino transitivo)</button>
+      <button class="example-btn" type="button"
+        @click="edges='Ana->Beto, Beto->Carla, Carla->Dario, Xavier->Yolanda'; verificador='Ana'; objetivo='Yolanda'">
+        Cargar ejemplo (sin camino)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>PKI jerárquico vs. red de confianza: ¿por qué son modelos distintos?</summary>
+  <p>En PKI jerárquico (ver "Certificados digitales"), la confianza es un <strong>árbol</strong>: todo
+  se reduce a confiar en una única raíz (Root CA), y cualquier certificado válido tiene exactamente un
+  camino de verificación hacia esa raíz. En una red de confianza, el grafo es arbitrario (no
+  necesariamente un árbol, puede tener ciclos, múltiples caminos, o ningún camino) y cada persona
+  decide en quién confiar directamente -- no hay una autoridad que todos acepten de antemano. La
+  búsqueda de un camino de confianza es literalmente un problema de <strong>alcanzabilidad en
+  grafos</strong> (el mismo problema que "¿puedo llegar de la ciudad A a la ciudad Z por carretera?").</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> PGP/GPG usa este modelo para el correo electrónico cifrado: cada
+  usuario firma las llaves de las personas que conoce en persona, y confía transitivamente en quienes
+  esas personas ya validaron. Es más resistente a un solo punto de fallo que PKI jerárquico (no hay una
+  CA que comprometer), pero es más difícil de usar a gran escala -- por eso PKI jerárquico domina en la
+  web (HTTPS) y PGP quedó más como herramienta de nicho.
+</div>
+{% endblock %}

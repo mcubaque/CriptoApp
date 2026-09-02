@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Criptografía clásica{% endblock %}
+{% block content %}
+<h1>Criptografía clásica</h1>
+<p class="subtitle">Cifra, descifra y rompe estos cifrados viendo cada paso del proceso.</p>
+<div class="card-grid">
+  <a class="card" href="{{ url_for('classical.shift_page') }}">
+    <h3>Desplazamiento (César)</h3>
+    <p>e_K(x) = (x + K) mod 26. Incluye fuerza bruta y criptoanálisis por frecuencias.</p>
+  </a>
+  <a class="card" href="{{ url_for('classical.affine_page') }}">
+    <h3>Afín</h3>
+    <p>e_K(x) = (ax + b) mod 26. Incluye verificación de llave legal y criptoanálisis.</p>
+  </a>
+  <a class="card" href="{{ url_for('classical.transposition_page') }}">
+    <h3>Transposición</h3>
+    <p>Reordena bloques de letras según una permutación.</p>
+  </a>
+  <a class="card" href="{{ url_for('classical.substitution_page') }}">
+    <h3>Sustitución</h3>
+    <p>Tabla de 26 letras. Incluye revelado interactivo guiado por frecuencias.</p>
+  </a>
+</div>
+{% endblock %}

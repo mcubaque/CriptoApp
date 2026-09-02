@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Certificados digitales{% endblock %}
+{% block content %}
+<h1>Certificados digitales</h1>
+<p class="subtitle">Un certificado es una afirmación firmada: "esta llave pública pertenece a este sujeto", avalada por un emisor.</p>
+
+<div class="panel" x-data="{ modo: 'emitir', subject:'', subjectE:'', subjectN:'', issuer:'', issuerD:'', issuerN:'',
+    vSubject:'', vIssuer:'', vSubjectE:'', vSubjectN:'', vSignature:'', vIssuerE:'', vIssuerN:'' }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='emitir'}" @click="modo='emitir'">Emitir certificado</button>
+    <button type="button" :class="{active: modo==='verificar'}" @click="modo='verificar'">Verificar certificado</button>
+    <button type="button" :class="{active: modo==='cadena'}" @click="modo='cadena'">Cadena de 3 niveles</button>
+  </div>
+
+  <form hx-post="{{ url_for('pki.certificates_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+
+    <div x-show="modo==='emitir'">
+      <div class="form-inline">
+        <div class="form-row"><label>Sujeto (a quién pertenece la llave)</label><input type="text" name="subject" x-model="subject" placeholder="Alice"></div>
+        <div class="form-row"><label>e del sujeto</label><input type="number" name="subject_e" x-model="subjectE" placeholder="17"></div>
+        <div class="form-row"><label>n del sujeto</label><input type="number" name="subject_n" x-model="subjectN" placeholder="3233"></div>
+      </div>
+      <div class="form-inline">
+        <div class="form-row"><label>Emisor (quién firma)</label><input type="text" name="issuer" x-model="issuer" placeholder="Root CA"></div>
+        <div class="form-row"><label>d del emisor</label><input type="number" name="issuer_d" x-model="issuerD" placeholder="3853"></div>
+        <div class="form-row"><label>n del emisor</label><input type="number" name="issuer_n" x-model="issuerN" placeholder="66013"></div>
+      </div>
+    </div>
+
+    <div x-show="modo==='verificar'">
+      <div class="form-inline">
+        <div class="form-row"><label>Sujeto</label><input type="text" name="v_subject" x-model="vSubject" placeholder="Alice"></div>
+        <div class="form-row"><label>e del sujeto</label><input type="number" name="v_subject_e" x-model="vSubjectE" placeholder="17"></div>
+        <div class="form-row"><label>n del sujeto</label><input type="number" name="v_subject_n" x-model="vSubjectN" placeholder="3233"></div>
+      </div>
+      <div class="form-inline">
+        <div class="form-row"><label>Emisor</label><input type="text" name="v_issuer" x-model="vIssuer" placeholder="Root CA"></div>
+        <div class="form-row"><label>Firma (número)</label><input type="number" name="v_signature" x-model="vSignature"></div>
+      </div>
+      <div class="form-inline">
+        <div class="form-row"><label>e del emisor</label><input type="number" name="v_issuer_e" x-model="vIssuerE" placeholder="17"></div>
+        <div class="form-row"><label>n del emisor</label><input type="number" name="v_issuer_n" x-model="vIssuerN" placeholder="66013"></div>
+      </div>
+    </div>
+
+    <p class="subtitle" x-show="modo==='cadena'" style="margin:0 0 10px;">
+      Corre automáticamente: Root CA (autofirmado) → Intermedia (firmada por Root) → Entidad final (firmada por Intermedia), y verifica los 3 eslabones.
+    </p>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" x-show="modo==='emitir'"
+        @click="subject='Alice'; subjectE=17; subjectN=3233; issuer='Root CA'; issuerD=3853; issuerN=66013">Cargar ejemplo</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+  <p class="subtitle" style="margin-top:10px; font-size:0.82rem;" x-show="modo==='verificar'">
+    Tip: primero emite un certificado en modo "Emitir", copia la firma del resultado, y pégala aquí junto con los mismos datos.
+  </p>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>Un certificado no es más que un mensaje firmado (ver "Firmas digitales"): los campos del
+  certificado (sujeto, llave pública del sujeto, emisor, vigencia) se concatenan en un string, se
+  hashea, y el emisor lo firma con SU llave privada. Cualquiera puede verificar con la llave pública
+  del emisor -- que a su vez puede venir avalada por OTRO certificado de un emisor superior, formando
+  una cadena. La confianza en toda la cadena se reduce, al final, a confiar en la llave pública de la
+  raíz (Root CA), que normalmente viene preinstalada en tu sistema operativo o navegador.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> los certificados X.509 (los que usa HTTPS) tienen muchos más campos
+  (algoritmo de firma, número de serie, extensiones, uso permitido de la llave...), y las fechas de
+  vigencia SÍ se validan estrictamente. Si el certificado de un sitio expiró o fue revocado, el
+  navegador rechaza la conexión aunque la firma matemática siga siendo válida.
+</div>
+{% endblock %}

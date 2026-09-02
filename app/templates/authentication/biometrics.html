@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Biométricos{% endblock %}
+{% block content %}
+<h1>Verificación biométrica</h1>
+<p class="subtitle">Plantillas simplificadas como cadenas de bits, comparadas por distancia de Hamming.</p>
+
+<div class="panel" x-data="{ modo: 'comparar', plantillaA: '', plantillaB: '', umbral: 80 }">
+  <div class="mode-toggle">
+    <button type="button" :class="{active: modo==='comparar'}" @click="modo='comparar'">Comparar plantillas</button>
+    <button type="button" :class="{active: modo==='far_frr'}" @click="modo='far_frr'">Curva FAR/FRR</button>
+  </div>
+
+  <form hx-post="{{ url_for('authentication.biometrics_run') }}" hx-target="#resultado" hx-swap="innerHTML" hx-indicator="#cargando">
+    <input type="hidden" name="modo" :value="modo">
+
+    <div x-show="modo==='comparar'">
+      <div class="form-inline">
+        <div class="form-row"><label>Plantilla A (bits)</label><input type="text" name="plantilla_a" x-model="plantillaA" placeholder="10110010110100101011001011010010"></div>
+        <div class="form-row"><label>Plantilla B (bits)</label><input type="text" name="plantilla_b" x-model="plantillaB" placeholder="10110010110100101011001011010011"></div>
+      </div>
+      <div class="form-row">
+        <label>Umbral de aceptación (% de similitud)</label>
+        <input type="number" name="umbral" x-model="umbral" min="0" max="100">
+      </div>
+    </div>
+
+    <p class="subtitle" x-show="modo==='far_frr'" style="margin:0 0 10px;">
+      Corre el barrido de umbrales sobre un set de ejemplo (pares genuinos e impostores ilustrativos).
+    </p>
+
+    <div class="btn-row">
+      <button class="btn" type="submit">Ejecutar</button>
+      <button class="example-btn" type="button" x-show="modo==='comparar'"
+        @click="plantillaA='10110010110100101011001011010010'; plantillaB='10110010110100101011001011010011'; umbral=90">
+        Cargar ejemplo (misma persona, ruido leve)</button>
+      <button class="example-btn" type="button" x-show="modo==='comparar'"
+        @click="plantillaA='10110010110100101011001011010010'; plantillaB='01001101001011010100110100101101'; umbral=90">
+        Cargar ejemplo (personas distintas)</button>
+      <span id="cargando" class="htmx-indicator">Calculando…</span>
+    </div>
+  </form>
+</div>
+
+<div id="resultado"></div>
+
+<details class="math-explainer">
+  <summary>¿Por qué funciona esto matemáticamente?</summary>
+  <p>La distancia de Hamming entre dos cadenas de bits de la misma longitud es simplemente el número
+  de posiciones en las que difieren -- se calcula con un XOR bit a bit y contando los 1s del resultado.
+  Ningún sensor biométrico real produce EXACTAMENTE la misma lectura dos veces (hay ruido: ángulo,
+  presión, iluminación), por eso no se puede pedir una coincidencia exacta como con una contraseña —
+  se necesita un umbral de similitud que tolere algo de ruido sin aceptar a un impostor.</p>
+</details>
+
+<div class="note-real-world">
+  <strong>En el mundo real:</strong> el sistema de reconocimiento de iris de Daugman usa exactamente
+  esta idea -- un "iris code" de 2048 bits comparado por distancia de Hamming -- y es de los sistemas
+  biométricos más precisos que existen, precisamente porque 2048 bits dan muchísimo más margen
+  estadístico entre pares genuinos e impostores que los 32 bits de este ejemplo educativo.
+</div>
+{% endblock %}

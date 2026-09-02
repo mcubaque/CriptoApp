@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Cripto App{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+  <script src="{{ url_for('static', filename='js/htmx.min.js') }}"></script>
+  <script defer src="{{ url_for('static', filename='js/alpine.min.js') }}"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="{{ url_for('main.index') }}">🔐 Cripto App</a>
+    <nav>
+      <a href="{{ url_for('classical.index') }}">Clásica</a>
+      <a href="{{ url_for('symmetric_modern.index') }}">Simétrica moderna</a>
+      <a href="{{ url_for('asymmetric.index') }}">Asimétrica</a>
+      <a href="{{ url_for('pki.index') }}">PKI</a>
+      <a href="{{ url_for('authentication.index') }}">Autenticación</a>
+      <a href="{{ url_for('history.index') }}">Historial</a>
+    </nav>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

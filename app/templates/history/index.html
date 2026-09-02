@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Historial{% endblock %}
+{% block content %}
+<h1>Historial de operaciones</h1>
+<p class="subtitle">Cada cifrado, descifrado o intento de ruptura exitoso queda guardado aquí.</p>
+
+<form class="filters" method="get">
+  <select name="family" onchange="this.form.submit()">
+    <option value="">Todas las familias</option>
+    {% for f in families %}
+    <option value="{{ f }}" {% if f == selected_family %}selected{% endif %}>{{ f }}</option>
+    {% endfor %}
+  </select>
+  <select name="algorithm" onchange="this.form.submit()">
+    <option value="">Todos los algoritmos</option>
+    {% for a in algorithms %}
+    <option value="{{ a }}" {% if a == selected_algorithm %}selected{% endif %}>{{ a }}</option>
+    {% endfor %}
+  </select>
+</form>
+
+{% if rows %}
+<table class="history-table">
+  <thead>
+    <tr><th>Fecha</th><th>Familia</th><th>Algoritmo</th><th>Operación</th><th>Entrada</th><th>Resultado</th></tr>
+  </thead>
+  <tbody>
+    {% for row in rows %}
+    <tr hx-get="{{ url_for('history.detail', row_id=row.id) }}" hx-target="#detalle" hx-swap="innerHTML">
+      <td>{{ row.created_at.strftime('%Y-%m-%d %H:%M') if row.created_at else '' }}</td>
+      <td>{{ row.family }}</td>
+      <td>{{ row.algorithm }}</td>
+      <td>{{ row.operation }}</td>
+      <td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ row.input_text }}</td>
+      <td style="max-width:220px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">{{ row.output_text }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="subtitle">Todavía no hay operaciones guardadas. Ve a cualquier algoritmo y ejecuta una.</p>
+{% endif %}
+
+<div id="detalle" style="margin-top:24px;"></div>
+{% endblock %}
