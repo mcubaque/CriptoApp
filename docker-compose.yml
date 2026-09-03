@@ -8,9 +8,22 @@ services:
       POSTGRES_PASSWORD: cripto_dev_password
       POSTGRES_DB: cripto_app
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
     volumes:
       - cripto_pg_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: cripto_app_web
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://cripto:cripto_dev_password@db:5432/cripto_app
+      FLASK_DEBUG: "0"
+    depends_on:
+      - db
+    ports:
+      - "127.0.0.1:8001:8000"
 
 volumes:
   cripto_pg_data:
