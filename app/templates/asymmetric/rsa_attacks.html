@@ -39,6 +39,7 @@
 
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar ataque</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('asymmetric.rsa_attacks_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" x-show="modo==='factorizar'" @click="n=3233">Cargar ejemplo</button>
       <button class="example-btn" type="button" x-show="modo==='modulo_comun'"
         @click="nCm=3233; e1=17; c1=2790; e2=19; c2=232">Cargar ejemplo</button>

@@ -34,6 +34,7 @@
 
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('asymmetric.rsa_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button"
         @click="p=61; q=53; e=17; m=65; cifradoC=2790; n=3233; d=2753">Cargar ejemplo clásico (Wikipedia RSA)</button>
       <span id="cargando" class="htmx-indicator">Calculando…</span>

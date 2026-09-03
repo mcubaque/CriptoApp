@@ -16,6 +16,7 @@
     </div>
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar intercambio</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('asymmetric.dh_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" @click="p=23; g=5; a=6; b=15">Cargar ejemplo clásico (Wikipedia DH)</button>
       <span id="cargando" class="htmx-indicator">Calculando…</span>
     </div>

@@ -30,6 +30,7 @@
 
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('authentication.biometrics_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" x-show="modo==='comparar'"
         @click="plantillaA='10110010110100101011001011010010'; plantillaB='10110010110100101011001011010011'; umbral=90">
         Cargar ejemplo (misma persona, ruido leve)</button>

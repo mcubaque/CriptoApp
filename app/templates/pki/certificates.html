@@ -50,6 +50,7 @@
 
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('pki.certificates_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" x-show="modo==='emitir'"
         @click="subject='Alice'; subjectE=17; subjectN=3233; issuer='Root CA'; issuerD=3853; issuerN=66013">Cargar ejemplo</button>
       <span id="cargando" class="htmx-indicator">Calculando…</span>

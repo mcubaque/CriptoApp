@@ -7,6 +7,30 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
   <script src="{{ url_for('static', filename='js/htmx.min.js') }}"></script>
   <script defer src="{{ url_for('static', filename='js/alpine.min.js') }}"></script>
+  <script>
+    // Abre la vista "Python Tutor" en una pestaña nueva mediante un <form>
+    // independiente, creado al vuelo -- HTMX intercepta el submit de
+    // cualquier botón dentro de un <form hx-post>, ignorando formaction/
+    // formtarget, así que un botón submit normal nunca llega a navegar.
+    function openTutorTab(triggerEl, url) {
+      const sourceForm = triggerEl.closest('form');
+      const tutorForm = document.createElement('form');
+      tutorForm.method = 'POST';
+      tutorForm.action = url;
+      tutorForm.target = '_blank';
+      tutorForm.style.display = 'none';
+      new FormData(sourceForm).forEach((value, key) => {
+        const input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key;
+        input.value = value;
+        tutorForm.appendChild(input);
+      });
+      document.body.appendChild(tutorForm);
+      tutorForm.submit();
+      document.body.removeChild(tutorForm);
+    }
+  </script>
 </head>
 <body>
   <header class="topbar">

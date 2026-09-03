@@ -35,6 +35,7 @@
 
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('classical.substitution_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" x-show="modo==='descifrar'"
         @click="texto='MGZVYZLGHCMHJMYXSSFMNHAHYCDLMHA'; llave='XNYAHPOGZQWBTSFLRCVMUEKJDI'">
         Cargar ejemplo del documento (descifrar)</button>

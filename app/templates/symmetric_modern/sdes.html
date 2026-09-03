@@ -17,6 +17,7 @@
     </div>
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('symmetric_modern.sdes_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" @click="bloque='00101000'; llave='1100011110'">
         Cargar ejemplo verificado</button>
       <span id="cargando" class="htmx-indicator">Calculando…</span>

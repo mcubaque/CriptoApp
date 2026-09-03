@@ -39,6 +39,7 @@
 
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('classical.affine_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" x-show="modo==='cifrar'"
         @click="texto='attackhasbeenalreadydone'; a=7; b=2">Cargar ejemplo del documento (cifrar)</button>
       <button class="example-btn" type="button" x-show="modo==='romper_frecuencia'"

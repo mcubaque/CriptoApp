@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Ejecución paso a paso — {{ title }}{% endblock %}
+{% block content %}
+<h1>Ejecución paso a paso: {{ title }}</h1>
+<p class="subtitle">Esto es el código Python real ejecutándose, línea por línea — no la explicación narrada, sino la lógica tal cual corre.</p>
+
+{% if not payload.ok %}
+<div class="alert error">La ejecución lanzó un error: {{ payload.error }}</div>
+{% elif not payload.steps %}
+<div class="alert error">No se capturó ninguna línea de ejecución (¿la función no tiene código bajo app/algorithms/?).</div>
+{% else %}
+
+<script id="tutor-data" type="application/json">{{ payload | tojson }}</script>
+<script>
+  function tutorState() {
+    const data = JSON.parse(document.getElementById('tutor-data').textContent);
+    return {
+      steps: data.steps,
+      sources: data.sources,
+      truncated: data.truncated,
+      idx: 0,
+      playing: false,
+      timer: null,
+      speedMs: 400,
+      get current() { return this.steps[this.idx]; },
+      get src() { return this.sources[this.current.file_key]; },
+      get lineNo() { return this.current.line_no; },
+      goTo(i) { this.idx = Math.max(0, Math.min(this.steps.length - 1, i)); },
+      next() { if (this.idx < this.steps.length - 1) { this.idx++; } else { this.stop(); } },
+      prev() { this.goTo(this.idx - 1); },
+      first() { this.stop(); this.goTo(0); },
+      last() { this.stop(); this.goTo(this.steps.length - 1); },
+      toggle() {
+        if (this.playing) { this.stop(); return; }
+        this.playing = true;
+        this.timer = setInterval(() => this.next(), this.speedMs);
+      },
+      stop() { this.playing = false; if (this.timer) { clearInterval(this.timer); this.timer = null; } },
+      localEntries() { return Object.entries(this.current.locals); },
+    };
+  }
+</script>
+
+<div class="tutor"
+     x-data="tutorState()"
+     x-init="$watch('speedMs', () => { if (playing) { stop(); toggle(); } })">
+
+  <div class="tutor-toolbar">
+    <button class="btn secondary" @click="first()" title="Ir al inicio">⏮</button>
+    <button class="btn secondary" @click="prev()" title="Paso anterior">◀</button>
+    <button class="btn" @click="toggle()" x-text="playing ? '⏸ Pausar' : '▶ Reproducir'"></button>
+    <button class="btn secondary" @click="next()" title="Paso siguiente">▶</button>
+    <button class="btn secondary" @click="last()" title="Ir al final">⏭</button>
+    <input type="range" :min="0" :max="steps.length - 1" x-model.number="idx" @input="stop()" style="flex:1;">
+    <span class="tutor-counter">Paso <span x-text="idx + 1"></span> / <span x-text="steps.length"></span></span>
+    <select x-model.number="speedMs" class="tutor-speed">
+      <option value="800">Lento</option>
+      <option value="400">Normal</option>
+      <option value="150">Rápido</option>
+    </select>
+  </div>
+
+  {% if payload.truncated %}
+  <div class="alert error" style="margin-top:0;">
+    La traza se truncó (demasiados pasos para mostrar de forma útil) — esto pasa con bucles muy
+    largos, como la fuerza bruta con muchos intentos. El resultado final sigue siendo correcto,
+    solo no se guardó cada línea intermedia.
+  </div>
+  {% endif %}
+
+  <div class="tutor-panes">
+    <div class="tutor-pane tutor-code">
+      <div class="tutor-pane-label" x-text="current.function + '()  —  ' + src.file_key.split('.')[0] + '.py'"></div>
+      <pre class="tutor-source"><template x-for="(line, i) in src.lines" :key="i"><div
+          class="tutor-line" :class="{ 'tutor-line-active': (src.start_line + i) === lineNo }"
+        ><span class="tutor-line-no" x-text="src.start_line + i"></span><span x-text="line"></span></div></template></pre>
+    </div>
+
+    <div class="tutor-pane tutor-vars">
+      <div class="tutor-pane-label">
+        Variables locales
+        <span class="badge" x-text="'profundidad ' + current.depth"></span>
+      </div>
+      <template x-if="current.event === 'return'">
+        <div class="tutor-return">↩ return <span x-text="JSON.stringify(current.return_value)"></span></div>
+      </template>
+      <table class="step-table">
+        <thead><tr><th>Variable</th><th>Valor</th></tr></thead>
+        <tbody>
+          <template x-for="[name, value] in localEntries()" :key="name">
+            <tr><td x-text="name"></td><td x-text="JSON.stringify(value)"></td></tr>
+          </template>
+          <tr x-show="localEntries().length === 0"><td colspan="2" style="color:var(--text-dim);">(sin variables locales todavía)</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -30,6 +30,7 @@
 
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('asymmetric.signature_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" x-show="modo==='firmar'"
         @click="texto='hola mundo'; d=2753; n=3233">Cargar ejemplo (par clásico RSA)</button>
       <span id="cargando" class="htmx-indicator">Calculando…</span>

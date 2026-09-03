@@ -33,6 +33,7 @@
 
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('asymmetric.hybrid_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" x-show="modo==='cifrar'"
         @click="texto='Hi!'; sessionKey='1010110011000101'; e=17; n=66013">Cargar ejemplo (destinatario con n=66013)</button>
       <span id="cargando" class="htmx-indicator">Calculando…</span>

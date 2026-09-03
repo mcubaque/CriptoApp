@@ -22,6 +22,7 @@
     </div>
     <div class="btn-row">
       <button class="btn" type="submit">Ejecutar</button>
+      <button class="btn secondary" type="button" onclick="openTutorTab(this, '{{ url_for('classical.transposition_tutor') }}')">🐍 Ver ejecución paso a paso</button>
       <button class="example-btn" type="button" x-show="modo==='cifrar'"
         @click="texto='shesellsseashellsbythesea shore'.replace(/ /g,''); llave='3,1,4,2,6,5'">
         Cargar ejemplo del documento</button>
